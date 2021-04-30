@@ -26,10 +26,16 @@ int main() {
     glViewport(0, 0, width, height);
     glClearColor(0.2, 0.3, 0.3, 1.0);
 
-    std::ifstream vs_shader;
-    vs_shader.open("shaders/texture_shader.vs");
-    if(vs_shader.is_open()) shaders::load_shader(vs_shader, GL_VERTEX_SHADER);
-    vs_shader.close();
+    std::ifstream texture_vs_shader("shaders/texture_shader.vs");
+    std::ifstream texture_fs_shader("shaders/texture_shader.fs");
+
+    if(!texture_vs_shader.is_open() || !texture_fs_shader.is_open()) {
+        glfwTerminate();
+        return -1;
+    }
+    unsigned int texture_shader = shaders::load_shader_program(texture_vs_shader, texture_fs_shader);
+    texture_vs_shader.close();
+    texture_fs_shader.close();
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
