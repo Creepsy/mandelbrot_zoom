@@ -3,6 +3,9 @@
 
 #include <cstddef>
 #include <string>
+#include <fstream>
+
+#include "shaders.h"
 
 GLFWwindow* create_window(const size_t width, const size_t height, const std::string& title);
 
@@ -21,7 +24,12 @@ int main() {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return -1;
 
     glViewport(0, 0, width, height);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.2, 0.3, 0.3, 1.0);
+
+    std::ifstream vs_shader;
+    vs_shader.open("shaders/texture_shader.vs");
+    if(vs_shader.is_open()) shaders::load_shader(vs_shader, GL_VERTEX_SHADER);
+    vs_shader.close();
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
