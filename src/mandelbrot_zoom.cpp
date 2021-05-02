@@ -5,7 +5,6 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <iostream>
 
 #include "shaders.h"
 
@@ -25,6 +24,7 @@ int main() {
     };
 
     const size_t width = 800, height = 600;
+    double zoom = 1.0, off_x = 0.0, off_y = 0.0;
 
     GLFWwindow* window = create_window(width, height, "Mandelbrot Zoom");
 
@@ -89,13 +89,24 @@ int main() {
         }
     }
 
-  //  glUseProgram(texture_shader);
+    int zoom_location = glGetUniformLocation(mandelbrot_shader, "zoom");
+    int offset_location = glGetUniformLocation(mandelbrot_shader, "offset");
+
     glBindVertexArray(rect_vao);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, render_texture);
 
     while(!glfwWindowShouldClose(window)) {
+        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) off_x -= zoom * 0.1;
+        if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) off_x += zoom * 0.1;
+        if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) off_y += zoom * 0.1;
+        if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) off_y -= zoom * 0.1;
+        if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) zoom *= 1.25;
+        if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) zoom /= 1.25;
+
         glUseProgram(mandelbrot_shader);
+        glUniform2d(offset_location, off_x, off_y);
+        glUniform1d(zoom_location, zoom);
         glDispatchCompute(width, height, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
