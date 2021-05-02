@@ -10,6 +10,7 @@
 
 GLFWwindow* create_window(const size_t width, const size_t height, const std::string& title);
 void load_vertices(const std::vector<float>& vertices, unsigned int& vbo, unsigned int& vao);
+unsigned int create_empty_texture(const size_t width, const size_t height, const GLint texture_wrap, const GLint texture_filter);
 
 int main() {
     const std::vector<float> rect_vertices = {
@@ -57,6 +58,8 @@ int main() {
     texture_vs_shader.close();
     texture_fs_shader.close();
 
+    unsigned int render_texture = create_empty_texture(width, height, GL_CLAMP_TO_BORDER, GL_LINEAR);
+
     glUseProgram(texture_shader);
 
     while(!glfwWindowShouldClose(window)) {
@@ -71,6 +74,7 @@ int main() {
     glDeleteProgram(texture_shader);
     glDeleteVertexArrays(1, &rect_vao);
     glDeleteBuffers(1, &rect_vbo);
+    glDeleteTextures(1, &render_texture);
 
     glfwTerminate();
 
@@ -99,4 +103,22 @@ void load_vertices(const std::vector<float>& vertices, unsigned int& vbo, unsign
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+unsigned int create_empty_texture(const size_t width, const size_t height, const GLint texture_wrap, const GLint texture_filter) {
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_filter);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+    return texture;
 }
