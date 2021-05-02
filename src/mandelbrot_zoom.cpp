@@ -40,29 +40,57 @@ int main() {
     glViewport(0, 0, width, height);
     glClearColor(0.2, 0.3, 0.3, 1.0);
 
-    std::ifstream texture_vs_shader("shaders/texture_shader.vs");
-    std::ifstream texture_fs_shader("shaders/texture_shader.fs");
-
-    if(!texture_vs_shader.is_open() || !texture_fs_shader.is_open()) {
-        glfwTerminate();
-        return -1;
-    }
-
     unsigned int rect_vbo, rect_vao;
     glGenBuffers(1, &rect_vbo);
     glGenVertexArrays(1, &rect_vao);
     load_vertices(rect_vertices, rect_vbo, rect_vao);
 
-    glBindVertexArray(rect_vao);
-
-    unsigned int texture_shader = shaders::load_shader_program(texture_vs_shader, texture_fs_shader);
-    texture_vs_shader.close();
-    texture_fs_shader.close();
-
     unsigned int render_texture = create_empty_texture(width, height, GL_CLAMP_TO_BORDER, GL_LINEAR);
     glBindImageTexture(0, render_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
+    unsigned int texture_shader; 
+    {
+        std::ifstream texture_vs_shader_file("shaders/texture_shader.vs");
+        std::ifstream texture_fs_shader_file("shaders/texture_shader.fs");
+
+        if(!texture_vs_shader_file.is_open() || !texture_fs_shader_file.is_open()) {
+            glfwTerminate();
+            return -1;
+        }
+        texture_shader = shaders::load_shader_program(texture_vs_shader_file, texture_fs_shader_file);
+        texture_vs_shader_file.close();
+        texture_fs_shader_file.close();
+    }
+
+    unsigned int mandelbrot_shader = glCreateProgram();
+    {
+        std::ifstream mandelbrot_shader_file("shaders/mandelbrot.cmp");
+
+        if(!mandelbrot_shader_file.is_open()) {
+            glfwTerminate();
+            return -1;
+        }
+
+        unsigned int comp_shader = shaders::load_shader(mandelbrot_shader_file, GL_COMPUTE_SHADER);
+        mandelbrot_shader_file.close();
+
+        glAttachShader(mandelbrot_shader, comp_shader);
+        glLinkProgram(mandelbrot_shader);
+
+        glDeleteShader(comp_shader);
+
+        int success;
+        glGetProgramiv(mandelbrot_shader, GL_LINK_STATUS, &success);
+
+        if(!success) {
+            char info[512];
+            glGetProgramInfoLog(mandelbrot_shader, 512, nullptr, info);
+            throw std::runtime_error("Shader program compilation error: " + std::string(info));
+        }
+    }
+
     glUseProgram(texture_shader);
+    glBindVertexArray(rect_vao);
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
