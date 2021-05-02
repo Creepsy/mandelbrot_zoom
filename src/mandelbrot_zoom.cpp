@@ -89,12 +89,19 @@ int main() {
         }
     }
 
-    glUseProgram(texture_shader);
+  //  glUseProgram(texture_shader);
     glBindVertexArray(rect_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, render_texture);
 
     while(!glfwWindowShouldClose(window)) {
+        glUseProgram(mandelbrot_shader);
+        glDispatchCompute(width, height, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glUseProgram(texture_shader);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glfwSwapBuffers(window);
