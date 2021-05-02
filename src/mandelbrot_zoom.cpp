@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 #include "shaders.h"
 
@@ -59,6 +60,7 @@ int main() {
     texture_fs_shader.close();
 
     unsigned int render_texture = create_empty_texture(width, height, GL_CLAMP_TO_BORDER, GL_LINEAR);
+    glBindImageTexture(0, render_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
     glUseProgram(texture_shader);
 
@@ -83,8 +85,8 @@ int main() {
 
 GLFWwindow* create_window(const size_t width, const size_t height, const std::string& title) {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -118,7 +120,9 @@ unsigned int create_empty_texture(const size_t width, const size_t height, const
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_filter);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     return texture;
 }
