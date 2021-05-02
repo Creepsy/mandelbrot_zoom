@@ -24,7 +24,7 @@ int main() {
         1.0, -1.0, 0.0
     };
 
-    const size_t width = 800, height = 400;
+    const size_t width = 800, height = 600;
 
     GLFWwindow* window = create_window(width, height, "Mandelbrot Zoom");
 
