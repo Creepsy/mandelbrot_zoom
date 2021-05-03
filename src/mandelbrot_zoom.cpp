@@ -107,7 +107,7 @@ int main() {
         glUseProgram(mandelbrot_shader);
         glUniform2d(offset_location, off_x, off_y);
         glUniform1d(zoom_location, zoom);
-        glDispatchCompute(width, height, 1);
+        glDispatchCompute(width / 32, height / 32, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         glClear(GL_COLOR_BUFFER_BIT);
